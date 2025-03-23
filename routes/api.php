@@ -9,9 +9,13 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-Route::get('/plants', [PlantController::class, 'index']);
-Route::get('/plants/{slug}', [PlantController::class, 'show']);
+Route::middleware('api')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::middleware('jwt.auth')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/plants', [PlantController::class, 'index']);
+        Route::get('/plants/{slug}', [PlantController::class, 'show']);
+    });
+});
