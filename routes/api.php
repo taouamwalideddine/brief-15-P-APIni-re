@@ -29,4 +29,15 @@ Route::middleware('jwt.auth')->group(function () {
 
     Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
 });
+
+
+Route::middleware(['jwt.auth', 'employee'])->group(function () {
+
+    Route::get('/employee/orders', [OrderController::class, 'employeeIndex']);
+
+    Route::put('/employee/orders/{id}', [OrderController::class, 'employeeUpdate']);
+
+    Route::get('/employee/orders/{id}', [OrderController::class, 'employeeShow']);
+});
+
 });

@@ -10,13 +10,13 @@ use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function employeeIndex()
     {
         $orders = Order::where('user_id', Auth::id())->with('items.plant')->get();
         return response()->json($orders);
     }
 
-    public function show($id)
+    public function employeeShow($id)
     {
         $order = Order::where('user_id', Auth::id())->with('items.plant')->find($id);
         if (!$order) {
@@ -48,6 +48,23 @@ class OrderController extends Controller
 
         return response()->json(['message' => 'Order placed successfully', 'order' => $order], 201);
     }
+
+public function employeeUpdate(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:pending,prepared,delivered',
+    ]);
+
+    $order = Order::find($id);
+    if (!$order) {
+        return response()->json(['message' => 'Order not found'], 404);
+    }
+
+    $order->status = $request->status;
+    $order->save();
+
+    return response()->json(['message' => 'Order status updated', 'order' => $order]);
+}
 
     public function destroy($id)
     {
