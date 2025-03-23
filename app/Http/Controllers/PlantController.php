@@ -3,13 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Plant;
+use App\DAO\PlantDAO;
 use Illuminate\Http\Request;
 
 class PlantController extends Controller
 {
+    protected $plantDAO;
+
+    public function __construct(PlantDAO $plantDAO)
+    {
+        $this->plantDAO = $plantDAO;
+    }
+
     public function index()
     {
-        $plants = Plant::with('category')->get();
+        $plants = $this->plantDAO->getAllPlants();
         return response()->json($plants);
     }
 
