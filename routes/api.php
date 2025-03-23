@@ -2,7 +2,8 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Admin\PlantController; // Correct namespace for PlantController
-use App\Http\Controllers\Admin\CategoryController; 
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\StatisticsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -37,4 +38,8 @@ Route::middleware(['jwt.auth', 'admin'])->group(function () {
     Route::post('/admin/plants', [PlantController::class, 'store']);
     Route::put('/admin/plants/{id}', [PlantController::class, 'update']);
     Route::delete('/admin/plants/{id}', [PlantController::class, 'destroy']);
+});
+
+Route::middleware(['jwt.auth', 'admin'])->group(function () {
+    Route::get('/admin/statistics', [StatisticsController::class, 'index']);
 });
