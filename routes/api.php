@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PlantController;
+use App\Http\Controllers\Admin\CategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,13 @@ Route::middleware(['jwt.auth', 'employee'])->group(function () {
     Route::put('/employee/orders/{id}', [OrderController::class, 'employeeUpdate']);
 
     Route::get('/employee/orders/{id}', [OrderController::class, 'employeeShow']);
+});
+
+Route::middleware(['jwt.auth', 'admin'])->group(function () {
+    Route::get('/admin/categories', [CategoryController::class, 'index']);
+    Route::post('/admin/categories', [CategoryController::class, 'store']);
+    Route::put('/admin/categories/{id}', [CategoryController::class, 'update']);
+    Route::delete('/admin/categories/{id}', [CategoryController::class, 'destroy']);
 });
 
 });
