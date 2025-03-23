@@ -17,7 +17,7 @@ return new class extends Migration
         $table->string('email')->unique();
         $table->string('password');
         $table->enum('role', ['customer', 'employee', 'admin'])->default('customer');
-        $table->timestamps(); 
+        $table->timestamps();
     });
 }
 
@@ -29,5 +29,6 @@ return new class extends Migration
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+
     }
 };

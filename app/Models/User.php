@@ -21,7 +21,7 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
-    }
+    }   
     /**
      * The attributes that are mass assignable.
      *
