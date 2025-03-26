@@ -1,14 +1,16 @@
 <?php
 
+
 namespace App\Repositories\Eloquent;
 
 use App\Models\User;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserRepository implements UserRepositoryInterface
 {
-    public function register(array $data)
+    public function create(array $data)
     {
         return User::create([
             'name' => $data['name'],
@@ -23,13 +25,18 @@ class UserRepository implements UserRepositoryInterface
         return User::where('email', $email)->first();
     }
 
-    public function createToken(object $user)
+    public function validateCredentials($user, string $password)
     {
-        return $user->createToken('auth_token')->plainTextToken;
+        return $user && Hash::check($password, $user->password);
     }
 
-    public function invalidateToken(object $user)
+    public function createToken($user)
     {
-        return $user->currentAccessToken()->delete();
+        return JWTAuth::fromUser($user);
+    }
+
+    public function invalidateToken($token)
+    {
+        return JWTAuth::invalidate($token);
     }
 }

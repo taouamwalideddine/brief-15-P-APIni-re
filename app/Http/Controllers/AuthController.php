@@ -1,30 +1,34 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 
 class AuthController extends Controller
 {
+    protected $userRepository;
+
+    public function __construct(UserRepositoryInterface $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
     public function register(Request $request)
     {
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:6',
-        ]); 
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'customer',
         ]);
 
-        $token = JWTAuth::fromUser($user);
+        $user = $this->userRepository->create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => $request->password,
+            'role' => 'customer'
+        ]);
+
+        $token = $this->userRepository->createToken($user);
 
         return response()->json([
             'message' => 'User registered successfully',
@@ -40,11 +44,13 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $credentials = $request->only('email', 'password');
+        $user = $this->userRepository->findByEmail($request->email);
 
-        if (!$token = JWTAuth::attempt($credentials)) {
+        if (!$this->userRepository->validateCredentials($user, $request->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
+
+        $token = $this->userRepository->createToken($user);
 
         return response()->json([
             'message' => 'Login successful',
@@ -52,10 +58,9 @@ class AuthController extends Controller
         ], 200);
     }
 
-    // Logout a user
     public function logout(Request $request)
     {
-        JWTAuth::invalidate(JWTAuth::getToken());
+        $this->userRepository->invalidateToken($request->bearerToken());
 
         return response()->json(['message' => 'Logout successful'], 200);
     }
