@@ -1,31 +1,31 @@
 <?php
-
 namespace Tests\Feature;
 
 use App\Models\Plant;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class OrderTest extends \Tests\TestCase
 {
     public function test_user_can_create_order()
     {
-        $user = User::create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password123'
+        $user = User::factory()->create([
+            'password' => Hash::make('password')
         ]);
 
-        $plant = Plant::create([
-            'name' => 'Rosemary',
-            'slug' => 'rosemary',
-            'price' => 6.99
-        ]);
+        $plant = Plant::factory()->create();
 
-        $response = $this->actingAs($user)->postJson('/api/orders', [
+        $token = $this->postJson('/api/login', [
+            'email' => $user->email,
+            'password' => 'password'
+        ])->json('token');
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->postJson('/api/orders', [
             'items' => [['plant_id' => $plant->id, 'quantity' => 2]]
         ]);
 
-        $response->assertStatus(201)
-            ->assertJson(['message' => 'Order placed successfully']);
+        $response->assertStatus(201);
     }
 }

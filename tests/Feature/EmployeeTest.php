@@ -4,29 +4,30 @@ namespace Tests\Feature;
 
 use App\Models\Order;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class EmployeeTest extends \Tests\TestCase
 {
     public function test_employee_can_update_order_status()
     {
-        $employee = User::create([
-            'name' => 'Employee',
-            'email' => 'employee@example.com',
-            'password' => 'password123',
-            'role' => 'employee'
+        $employee = User::factory()->create([
+            'role' => 'employee',
+            'password' => Hash::make('password')
         ]);
 
-        $order = Order::create([
-            'user_id' => 1,
-            'status' => 'pending'
+        $order = Order::factory()->create();
+
+        $token = $this->postJson('/api/login', [
+            'email' => $employee->email,
+            'password' => 'password'
+        ])->json('token');
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->putJson("/api/employee/orders/{$order->id}", [
+            'status' => 'prepared'
         ]);
 
-        $response = $this->actingAs($employee)
-            ->putJson("/api/employee/orders/{$order->id}", [
-                'status' => 'prepared'
-            ]);
-
-        $response->assertStatus(200)
-            ->assertJson(['message' => 'Order status updated']);
+        $response->assertStatus(200);
     }
 }

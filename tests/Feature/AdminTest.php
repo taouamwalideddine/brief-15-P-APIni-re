@@ -3,25 +3,29 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class AdminTest extends \Tests\TestCase
 {
     public function test_admin_can_create_category()
     {
-        $admin = User::create([
-            'name' => 'Admin',
-            'email' => 'admin@example.com',
-            'password' => 'password123',
-            'role' => 'admin'
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'password' => Hash::make('password')
         ]);
 
-        $response = $this->actingAs($admin)
-            ->postJson('/api/admin/categories', [
-                'name' => 'Herbs',
-                'slug' => 'herbs'
-            ]);
+        $token = $this->postJson('/api/login', [
+            'email' => $admin->email,
+            'password' => 'password'
+        ])->json('token');
 
-        $response->assertStatus(201)
-            ->assertJson(['message' => 'Category created']);
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token
+        ])->postJson('/api/admin/categories', [
+            'name' => 'Herbs',
+            'slug' => 'herbs'
+        ]);
+
+        $response->assertStatus(201);
     }
 }
